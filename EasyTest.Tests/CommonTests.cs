@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-using DevExpress.EasyTest.Framework;
-using EasyTest.Tests.Utils;
-using Xunit;
 using EasyTest.Tests.PageObjects;
+using EasyTest.Tests.Utils;
 using Shouldly;
 
 namespace EasyTest.Tests
