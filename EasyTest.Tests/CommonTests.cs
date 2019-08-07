@@ -4,6 +4,8 @@ using NUnit.Framework;
 using DevExpress.EasyTest.Framework;
 using EasyTest.Tests.Utils;
 using Xunit;
+using EasyTest.Tests.PageObjects;
+using Shouldly;
 
 namespace EasyTest.Tests
 {
@@ -19,15 +21,34 @@ namespace EasyTest.Tests
 
         protected void ChangeContactNameTest_()
         {
-            var control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "");
-            var table = control.GetInterface<IGridBase>();
-            Assert.Equal(2, table.GetRowCount());
+            var contactList = new ApplicationPageObject(Fixture)
+                .NavigateToContact()
+                .Assert(d =>
+                {
+                    d.RowCount.ShouldBe(2);
+                    d.GetValues(0, "Full Name")
+                        .ShouldBe(new Dictionary<string, string>()
+                        {
+                            ["Full Name"] = "John Nilsen"
+                        });
 
-            var column = Fixture.CommandAdapter.GetColumn(control, "Full Name");
-
-            Assert.Equal("John Nilsen", table.GetCellValue(0, column));
-            Assert.Equal("Mary Tellitson", table.GetCellValue(1, column));
-
+                    d.GetValues(1, "Full Name")
+                        .ShouldBe(new Dictionary<string, string>()
+                        {
+                            ["Full Name"] = "Mary Tellitson"
+                        });
+                });
+            
+            var contactDetail = contactList
+                .OpenRecordByFullName("Mary Tellitson")
+                .Assert(c =>
+                {
+                    c.FullName.ShouldBe("Mary Tellitson");
+                    c.Department.ShouldBe("Development Department");
+                    c.Position.ShouldBe("Manager");
+                })
+                .ExecuteActionIf(c => c.EditAction, f => f.IsWeb)
+                        
             Fixture.CommandAdapter.ProcessRecord("Contact", new string[] { "Full Name" }, new string[] { "Mary Tellitson" }, "");
 
             Assert.Equal("Mary Tellitson", Fixture.CommandAdapter.GetFieldValue("Full Name"));
@@ -52,22 +73,27 @@ namespace EasyTest.Tests
 
         protected void WorkingWithTasks_()
         {
-            Fixture.CommandAdapter.DoAction("Navigation", "Default.Demo Task");
-            Fixture.CommandAdapter.ProcessRecord("Demo Task", new string[] { "Subject" }, new string[] { "Fix breakfast" }, "");
+            var taskDetail = new ApplicationPageObject(Fixture)
+               .NavigateTo("Demo Task")
+               .OpenRecord("Subject", "Fix breakfast");
 
-            var control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contacts");
-            var table = control.GetInterface<IGridBase>();
-            Assert.Equal(0, table.GetRowCount());
-
-            Fixture.CommandAdapter.DoAction("Contacts.Link", null);
-            control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contact");
-            control.GetInterface<IGridRowsSelection>().SelectRow(0);
-            Fixture.CommandAdapter.DoAction("OK", null);
-
-            control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contacts");
-            table = control.GetInterface<IGridBase>();
-            Assert.Equal(1, table.GetRowCount());
-            Assert.Equal("John Nilsen", Fixture.CommandAdapter.GetCellValue("Contacts", 0, "Full Name"));
+            taskDetail
+                .List("Contacts")
+                .Assert(c => c.RowCount.ShouldBe(0))
+                .ExecuteAction(c => c.LinkAction, f => new ListPageObject(f, "Contact"), contactsPopup =>
+                {
+                    contactsPopup
+                        .SelectRow(0)
+                        .ExecuteAction(x => x.Action("OK"));
+                })
+                .Assert(c =>
+                {
+                    c.RowCount.ShouldBe(1);
+                    c.GetValues(0, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "John Nilsen"
+                    });
+                });
         }
 
         protected void ChangeContactNameAgainTest_()
