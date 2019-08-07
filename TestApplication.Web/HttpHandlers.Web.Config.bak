@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<httpHandlers>
+      <add verb="*" path="TestControls.axd" type="DevExpress.ExpressApp.Web.TestScripts.TestScriptsManager, DevExpress.ExpressApp.Web.v10.2, Version=10.2.6.0, culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+      <add verb="*" path="ImageResource.axd" type="DevExpress.ExpressApp.Web.ImageResourceHttpHandler, DevExpress.ExpressApp.Web.v10.2, Version=10.2.6.0, culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+      <add verb="*" path="*.aspx" type="DevExpress.ExpressApp.Web.WebWindowTemplateHttpHandler, DevExpress.ExpressApp.Web.v10.2, Version=10.2.6.0, culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    </httpHandlers>

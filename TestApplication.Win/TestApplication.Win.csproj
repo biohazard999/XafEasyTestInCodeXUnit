@@ -1,0 +1,86 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <ProjectGuid>{D05D93DF-312D-4D4E-B980-726871EC7833}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
+    <TargetFramework>net462</TargetFramework>
+    <AssemblyTitle>TestApplication.Win</AssemblyTitle>
+    <Company>-</Company>
+    <Product>TestApplication.Win</Product>
+    <Copyright>Copyright © - 2007</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Configurations>Debug;Release;EasyTest</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG;EASYTEST</DefineConstants>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\TestApplication.Web\EasyTest\InMemoryDataStoreProvider.cs" Link="EasyTest\InMemoryDataStoreProvider.cs" />
+    <Compile Include="..\TestApplication.Web\EasyTest\PrintDataExtensions.cs" Link="EasyTest\PrintDataExtensions.cs" />
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="WinApplication.resx">
+      <DependentUpon>WinApplication.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Update="WinApplication.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="WinApplication.Designer.cs">
+      <DependentUpon>WinApplication.cs</DependentUpon>
+    </Compile>
+    <Content Include="Model.xafml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ExpressApp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Images" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Win" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Images" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Win.BonusSkins" Version="19.1.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TestApplication.Module\TestApplication.Module.csproj" />
+  </ItemGroup>
+</Project>
