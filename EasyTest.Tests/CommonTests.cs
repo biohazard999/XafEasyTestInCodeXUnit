@@ -38,7 +38,7 @@ namespace EasyTest.Tests
                             ["Full Name"] = "Mary Tellitson"
                         });
                 });
-            
+
             var contactDetail = contactList
                 .OpenRecordByFullName("Mary Tellitson")
                 .Assert(c =>
@@ -47,8 +47,16 @@ namespace EasyTest.Tests
                     c.Department.ShouldBe("Development Department");
                     c.Position.ShouldBe("Manager");
                 })
-                .ExecuteActionIf(c => c.EditAction, f => f.IsWeb)
-                        
+                .ExecuteActionIf(f => f.IsWeb, c => c.EditAction)
+                .Do(c =>
+                {
+                    c.FirstName = "User_1";
+                    c.LastName = "User_2";
+                    c.Position = "Developer";
+                })
+                .ExecuteAction(c => c.SaveAction);
+
+
             Fixture.CommandAdapter.ProcessRecord("Contact", new string[] { "Full Name" }, new string[] { "Mary Tellitson" }, "");
 
             Assert.Equal("Mary Tellitson", Fixture.CommandAdapter.GetFieldValue("Full Name"));

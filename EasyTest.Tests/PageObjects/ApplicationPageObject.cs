@@ -24,6 +24,34 @@ namespace EasyTest.Tests.PageObjects
         }
 
         public virtual ActionPageObject Action(string actionName) => new ActionPageObject(Fixture, actionName);
+
+        public T ExecuteAction(Func<T, ActionPageObject> action)
+        {
+            action(This).Execute();
+            return This;
+        }
+
+        public T ExecuteAction<TPageObject>(Func<T, ActionPageObject> action, Func<EasyTestFixtureBase, TPageObject> pageObjectFactory, Action<TPageObject> executor)
+        {
+            action(This).Execute();
+            executor(pageObjectFactory(Fixture));
+            return This;
+        }
+
+        public T ExecuteActionIf(Predicate<EasyTestFixtureBase> predicate, Func<T, ActionPageObject> action)
+        {
+            if (predicate(Fixture))
+            {
+                return ExecuteAction(action);
+            }
+            return This;
+        }
+        
+        public T Do(Action<T> action)
+        {
+            action(This);
+            return This;
+        }
     }
 
     public class NestedListPageObject : NestedListPageObject<NestedListPageObject>
@@ -115,20 +143,6 @@ namespace EasyTest.Tests.PageObjects
             TestControl.GetInterface<IGridRowsSelection>().SelectRow(rowIndex);
             return This;
         }
-
-        public T ExecuteAction(Func<T, ActionPageObject> action)
-        {
-            action(This).Execute();
-            return This;
-        }
-
-        public T ExecuteAction<TPageObject>(Func<T, ActionPageObject> action, Func<EasyTestFixtureBase, TPageObject> pageObjectFactory, Action<TPageObject> executor)
-        {
-            action(This).Execute();
-            executor(pageObjectFactory(Fixture));
-            return This;
-        }
-
     }
 
     public class DepartmentListPageObject : DepartmentListPageObject<DepartmentListPageObject>
@@ -170,10 +184,16 @@ namespace EasyTest.Tests.PageObjects
         public DetailPageObject(EasyTestFixtureBase fixture) : base(fixture) { }
 
         public ListPageObject List(string tableName) => new ListPageObject(Fixture, tableName);
+
+        public string GetValue(string fieldName) => Fixture.CommandAdapter.GetFieldValue(fieldName);
+        public void SetValue(string fieldName, string value) => Fixture.CommandAdapter.SetFieldValue(fieldName, value);
+
+        public ActionPageObject EditAction => Action("Edit");
+        public ActionPageObject SaveAction => Action("Save");
     }
 
 
-    public class ContactDetailPageObject : DepartmentDetailPageObject<ContactDetailPageObject>
+    public class ContactDetailPageObject : ContactDetailPageObject<ContactDetailPageObject>
     {
         public ContactDetailPageObject(EasyTestFixtureBase fixture) : base(fixture) { }
     }
@@ -182,10 +202,38 @@ namespace EasyTest.Tests.PageObjects
         where T : ContactDetailPageObject<T>
     {
         public ContactDetailPageObject(EasyTestFixtureBase fixture) : base(fixture) { }
-
         
+        public string FirstName
+        {
+            get => GetValue("First Name");
+            set => SetValue("First Name", value);
+        }
+        
+        public string LastName
+        {
+            get => GetValue("Last Name");
+            set => SetValue("Last Name", value);
+        }
+
+        public string FullName
+        {
+            get => GetValue("Full Name");
+            set => SetValue("Full Name", value);
+        }
+        
+        public string Department
+        {
+            get => GetValue("Department");
+            set => SetValue("Department", value);
+        }
+        
+        public string Position
+        {
+            get => GetValue("Position");
+            set => SetValue("Position", value);
+        }
     }
-    
+
     public class DepartmentDetailPageObject : DepartmentDetailPageObject<DepartmentDetailPageObject>
     {
         public DepartmentDetailPageObject(EasyTestFixtureBase fixture) : base(fixture) { }
