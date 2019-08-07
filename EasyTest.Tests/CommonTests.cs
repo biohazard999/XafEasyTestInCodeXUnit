@@ -60,7 +60,7 @@ namespace EasyTest.Tests
                     c.FullName.ShouldBe("User_1 User_2");
                     c.Position.ShouldBe("Developer");
                 })
-                .ExecuteActionIf(f => !f.IsWeb, c => c.CloseAction);
+                .ExecuteAction(c => c.SaveAndCloseAction);
 
             contactList.GetValues(1, "Full Name", "Position").ShouldBe(new Dictionary<string, string>
             {

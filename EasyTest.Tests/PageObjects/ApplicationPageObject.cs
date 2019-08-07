@@ -190,6 +190,7 @@ namespace EasyTest.Tests.PageObjects
 
         public ActionPageObject EditAction => Action("Edit");
         public ActionPageObject SaveAction => Action("Save");
+        public ActionPageObject SaveAndCloseAction => Action("Save and Close");
         public ActionPageObject CloseAction => Action("Close");
     }
 
