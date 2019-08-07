@@ -18,7 +18,7 @@ namespace EasyTest.Tests
             => ChangeContactNameAgainTest_();
 
         [Fact]
-        public void UnlinkActionTest2()
+        public void UnlinkActionTest()
         {
             var departmentDetail = new ApplicationPageObject(Fixture)
                 .NavigateToDepartment()
