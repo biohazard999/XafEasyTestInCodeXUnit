@@ -1,5 +1,4 @@
 using System;
-using NUnit.Framework;
 using Xunit;
 
 namespace EasyTest.Tests

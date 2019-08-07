@@ -20,7 +20,7 @@ namespace EasyTest.Tests.Utils
         {
             this.applicationDirectoryName = applicationDirectoryName;
             this.applicationName = applicationName;
-            
+
             application = new TestApplication();
             var doc = new XmlDocument();
             var additionalAttributes = new List<XmlAttribute>
@@ -30,7 +30,7 @@ namespace EasyTest.Tests.Utils
             };
 
             application.AdditionalAttributes = additionalAttributes.ToArray();
-            
+
             applicationAdapter = new WinAdapter();
             applicationAdapter.RunApplication(application, $"ConnectionString={InMemoryDataStoreProvider.ConnectionString};FOO=BAR");
             adapter = ((IApplicationAdapter)applicationAdapter).CreateCommandAdapter();
@@ -39,7 +39,7 @@ namespace EasyTest.Tests.Utils
 
         public override void Dispose()
             => applicationAdapter.KillApplication(application, KillApplicationContext.TestAborted);
-        
+
         public override ICommandAdapter Adapter => adapter;
         public override TestCommandAdapter CommandAdapter => commandAdapter;
         public override bool IsWeb => false;
