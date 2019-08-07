@@ -7,7 +7,6 @@ namespace EasyTest.Tests.PageObjects
         public NestedListPageObject(EasyTestFixtureBase fixture, string listName) : base(fixture, listName) { }
     }
     
-    
     public abstract class NestedListPageObject<T> : ListPageObject<T>
         where T : NestedListPageObject<T>
     {

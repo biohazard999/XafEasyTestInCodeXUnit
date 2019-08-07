@@ -6,7 +6,6 @@ namespace EasyTest.Tests.PageObjects
 {
     public abstract class PageObject<T> where T : PageObject<T>
     {
-
         protected readonly EasyTestFixtureBase Fixture;
         public PageObject(EasyTestFixtureBase fixture)
             => Fixture = fixture;
