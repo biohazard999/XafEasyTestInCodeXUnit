@@ -34,10 +34,16 @@ steps:
 - task: VSBuild@1
   inputs:
     solution: '**\*.sln'
+    configuration: EASYTEST
 
-- script: |
-    dotnet test --logger:"xunit;LogFilePath=$(Build.SourcesDirectory)\artifacts\tests\test-report.xml"
-  displayName: 'Run test'
+- task: VSTest@2
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\*test*.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
 
 - task: PublishTestResults@2
   inputs:
