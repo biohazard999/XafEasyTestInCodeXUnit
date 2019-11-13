@@ -19,10 +19,9 @@ steps:
     packageType: sdk
     useGlobalJson: $(System.DefaultWorkingDirectory)/global.json
     installationPath: $(Agent.ToolsDirectory)/dotnet
-
-- script: |
-    dotnet build
-  displayName: 'Run build'
+- task: VSBuild@1
+  inputs:
+    solution: '**\*.sln'
 
 - script: |
     dotnet test --logger:"xunit;LogFilePath=$(Build.SourcesDirectory)\artifacts\tests\test-report.xml"
