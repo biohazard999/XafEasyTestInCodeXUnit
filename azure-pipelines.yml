@@ -2,13 +2,9 @@ trigger:
 - master
 
 pool:
-  #https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
-  vmImage: 'windows-2019'
+  name: 'UI-Tests'
 
 steps:
-- script: |
-    call bootstrap.bat
-  displayName: 'Run bootstrapper'
 
 - script: |
     IF DEFINED DX_PACKAGE_SOURCE tools\nuget.exe sources add -Name "DX" -Source "%DX_PACKAGE_SOURCE%" -ConfigFile nuget.config
@@ -26,8 +22,8 @@ steps:
   displayName: 'Run build'
 
 - script: |
-    dotnet test
-  displayName: 'Run build'
+    dotnet test --logger:"xunit;LogFilePath=$(Build.SourcesDirectory)\artifacts\tests\test-report.xml"
+  displayName: 'Run test'
 
 - task: PublishTestResults@2
   inputs:
