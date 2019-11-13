@@ -9,6 +9,10 @@ steps:
 - script: |
     call bootstrap.bat
   displayName: 'Run bootstrapper'
+  
+- script: |
+    call bootstrap.bat
+  displayName: 'Run bootstrapper'
 
 - script: |
     IF DEFINED DX_PACKAGE_SOURCE tools\nuget.exe sources add -Name "DX" -Source "%DX_PACKAGE_SOURCE%" -ConfigFile nuget.config
