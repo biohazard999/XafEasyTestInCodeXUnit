@@ -12,6 +12,10 @@ steps:
 - script: |
     IF DEFINED DX_PACKAGE_SOURCE tools\nuget.exe sources add -Name "DX" -Source "%DX_PACKAGE_SOURCE%" -ConfigFile nuget.config
   displayName: "Set package sources"
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: 
+    checkLatest: true
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk'
@@ -19,6 +23,14 @@ steps:
     packageType: sdk
     useGlobalJson: $(System.DefaultWorkingDirectory)/global.json
     installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: '/nuget.config'
+
 - task: VSBuild@1
   inputs:
     solution: '**\*.sln'
