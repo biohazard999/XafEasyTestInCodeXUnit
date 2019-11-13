@@ -1,5 +1,6 @@
-﻿using NUnit.Framework;
-using DevExpress.EasyTest.Framework;
+﻿using System.Collections.Generic;
+using EasyTest.Tests.PageObjects;
+using Shouldly;
 using Xunit;
 
 namespace EasyTest.Tests
@@ -19,31 +20,38 @@ namespace EasyTest.Tests
         [Fact]
         public void UnlinkActionTest()
         {
-            Fixture.CommandAdapter.DoAction("Navigation", "Department");
-            Fixture.CommandAdapter.ProcessRecord("Department", new string[] { "Title" }, new string[] { "Development Department" }, "");
+            var departmentDetail = new ApplicationPageObject(Fixture)
+                .NavigateToDepartment()
+                .OpenRecordByTitle("Development Department");
 
-            Fixture.CommandAdapter.DoAction("Positions", null);
+            departmentDetail
+                .Positions()
+                .Assert(p =>
+                {
+                    p.RowCount.ShouldBe(2);
+                    p.GetValues(0, "Title").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Title"] = "Developer"
+                    });
+                    p.UnlinkAction.Enabled.ShouldBeFalse();
+                })
+                .SelectRow(0)
+                .Assert(p => p.UnlinkAction.Enabled.ShouldBeTrue())
+                .ExecuteAction(p => p.UnlinkAction)
+                .Assert(p =>
+                {
+                    p.RowCount.ShouldBe(1);
+                    p.GetValues(0, "Title").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Title"] = "Manager"
+                    });
+                });
 
-            var gridControl = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Positions");
-            Assert.Equal(2, gridControl.GetInterface<IGridBase>().GetRowCount());
-
-            Assert.Equal("Developer", Fixture.CommandAdapter.GetCellValue("Positions", 0, "Title"));
-
-            var unlink = Fixture.Adapter.CreateTestControl(TestControlType.Action, "Positions.Unlink");
-            Assert.False(unlink.GetInterface<IControlEnabled>().Enabled);
-
-
-            gridControl.GetInterface<IGridRowsSelection>().SelectRow(0);
-
-            Assert.True(unlink.GetInterface<IControlEnabled>().Enabled);
-            Fixture.CommandAdapter.DoAction("Positions.Unlink", null);
-
-            Assert.Equal(1, gridControl.GetInterface<IGridBase>().GetRowCount());
-            Assert.Equal("Manager", Fixture.CommandAdapter.GetCellValue("Positions", 0, "Title"));
-
-            Fixture.CommandAdapter.DoAction("Contacts", null);
-            unlink = Fixture.Adapter.CreateTestControl(TestControlType.Action, "Contacts.Unlink");
-            Assert.False(unlink.GetInterface<IControlEnabled>().Enabled);
+            departmentDetail
+                .Contacts()
+                .Assert(c => c.UnlinkAction.Enabled.ShouldBeFalse())
+                .SelectRow(0)
+                .Assert(c => c.UnlinkAction.Enabled.ShouldBeTrue());
         }
     }
 }

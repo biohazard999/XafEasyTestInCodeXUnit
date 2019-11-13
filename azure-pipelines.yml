@@ -1,0 +1,50 @@
+trigger:
+- master
+
+pool:
+  #https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
+  vmImage: 'windows-2019'
+
+steps:
+- script: |
+    call bootstrap.bat
+  displayName: 'Run bootstrapper'
+
+- script: |
+    IF DEFINED DX_PACKAGE_SOURCE tools\nuget.exe sources add -Name "DX" -Source "%DX_PACKAGE_SOURCE%" -ConfigFile nuget.config
+  displayName: "Set package sources"
+
+- task: UseDotNet@2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    useGlobalJson: $(System.DefaultWorkingDirectory)/global.json
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- script: |
+    dotnet build
+  displayName: 'Run build'
+
+- script: |
+    dotnet test
+  displayName: 'Run build'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'Xunit'
+    testResultsFiles: 'artifacts/tests/**/*.xml'
+    mergeTestResults: false
+    failTaskOnFailedTests: true
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'artifacts'
+    Contents: '**/*.*'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    CleanTargetFolder: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'artifacts'
+    publishLocation: 'Container'

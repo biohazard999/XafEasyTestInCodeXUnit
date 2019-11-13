@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-using DevExpress.EasyTest.Framework;
+using EasyTest.Tests.PageObjects;
 using EasyTest.Tests.Utils;
-using Xunit;
+using Shouldly;
 
 namespace EasyTest.Tests
 {
@@ -19,81 +18,125 @@ namespace EasyTest.Tests
 
         protected void ChangeContactNameTest_()
         {
-            var control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "");
-            var table = control.GetInterface<IGridBase>();
-            Assert.Equal(2, table.GetRowCount());
+            var contactList = new ApplicationPageObject(Fixture)
+                .NavigateToContact()
+                .Assert(d =>
+                {
+                    d.RowCount.ShouldBe(2);
+                    d.GetValues(0, "Full Name")
+                        .ShouldBe(new Dictionary<string, string>()
+                        {
+                            ["Full Name"] = "John Nilsen"
+                        });
 
-            var column = Fixture.CommandAdapter.GetColumn(control, "Full Name");
+                    d.GetValues(1, "Full Name")
+                        .ShouldBe(new Dictionary<string, string>()
+                        {
+                            ["Full Name"] = "Mary Tellitson"
+                        });
+                });
 
-            Assert.Equal("John Nilsen", table.GetCellValue(0, column));
-            Assert.Equal("Mary Tellitson", table.GetCellValue(1, column));
+            var contactDetail = contactList
+                .OpenRecordByFullName("Mary Tellitson")
+                .Assert(c =>
+                {
+                    c.FullName.ShouldBe("Mary Tellitson");
+                    c.Department.ShouldBe("Development Department");
+                    c.Position.ShouldBe("Manager");
+                })
+                .ExecuteActionIf(f => f.IsWeb, c => c.EditAction)
+                .Do(c =>
+                {
+                    c.FirstName = "User_1";
+                    c.LastName = "User_2";
+                    c.Position = "Developer";
+                })
+                .ExecuteAction(c => c.SaveAction)
+                .Assert(c =>
+                {
+                    c.FullName.ShouldBe("User_1 User_2");
+                    c.Position.ShouldBe("Developer");
+                })
+                .ExecuteAction(c => c.SaveAndCloseAction);
 
-            Fixture.CommandAdapter.ProcessRecord("Contact", new string[] { "Full Name" }, new string[] { "Mary Tellitson" }, "");
-
-            Assert.Equal("Mary Tellitson", Fixture.CommandAdapter.GetFieldValue("Full Name"));
-            Assert.Equal("Development Department", Fixture.CommandAdapter.GetFieldValue("Department"));
-            Assert.Equal("Manager", Fixture.CommandAdapter.GetFieldValue("Position"));
-
-            if (Fixture.IsWeb)
+            contactList.GetValues(1, "Full Name", "Position").ShouldBe(new Dictionary<string, string>
             {
-                Fixture.CommandAdapter.DoAction("Edit", null);
-            }
-
-            Fixture.CommandAdapter.SetFieldValue("First Name", "User_1");
-            Fixture.CommandAdapter.SetFieldValue("Last Name", "User_2");
-
-            Fixture.CommandAdapter.SetFieldValue("Position", "Developer");
-
-            Fixture.CommandAdapter.DoAction("Save", null);
-
-            Assert.Equal("User_1 User_2", Fixture.CommandAdapter.GetFieldValue("Full Name"));
-            Assert.Equal("Developer", Fixture.CommandAdapter.GetFieldValue("Position"));
+                ["Full Name"] = "User_1 User_2",
+                ["Position"] = "Developer"
+            });
         }
 
         protected void WorkingWithTasks_()
         {
-            Fixture.CommandAdapter.DoAction("Navigation", "Default.Demo Task");
-            Fixture.CommandAdapter.ProcessRecord("Demo Task", new string[] { "Subject" }, new string[] { "Fix breakfast" }, "");
+            var taskDetail = new ApplicationPageObject(Fixture)
+               .NavigateTo("Demo Task")
+               .OpenRecord("Subject", "Fix breakfast");
 
-            var control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contacts");
-            var table = control.GetInterface<IGridBase>();
-            Assert.Equal(0, table.GetRowCount());
-
-            Fixture.CommandAdapter.DoAction("Contacts.Link", null);
-            control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contact");
-            control.GetInterface<IGridRowsSelection>().SelectRow(0);
-            Fixture.CommandAdapter.DoAction("OK", null);
-
-            control = Fixture.Adapter.CreateTestControl(TestControlType.Table, "Contacts");
-            table = control.GetInterface<IGridBase>();
-            Assert.Equal(1, table.GetRowCount());
-            Assert.Equal("John Nilsen", Fixture.CommandAdapter.GetCellValue("Contacts", 0, "Full Name"));
+            taskDetail
+                .List("Contacts")
+                .Assert(c => c.RowCount.ShouldBe(0))
+                .ExecuteAction(c => c.LinkAction, f => new ListPageObject(f, "Contact"), contactsPopup =>
+                {
+                    contactsPopup
+                        .SelectRow(0)
+                        .ExecuteAction(x => x.Action("OK"));
+                })
+                .Assert(c =>
+                {
+                    c.RowCount.ShouldBe(1);
+                    c.GetValues(0, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "John Nilsen"
+                    });
+                });
         }
 
         protected void ChangeContactNameAgainTest_()
         {
-            Assert.Equal("John Nilsen", Fixture.CommandAdapter.GetCellValue("Contact", 0, "Full Name"));
-            Assert.Equal("Mary Tellitson", Fixture.CommandAdapter.GetCellValue("Contact", 1, "Full Name"));
+            var application = new ApplicationPageObject(Fixture);
 
-            Fixture.CommandAdapter.ProcessRecord("Contact", new string[] { "Full Name" }, new string[] { "Mary Tellitson" }, "");
+            var contactList = application
+                .NavigateToContact()
+                .Assert(c =>
+                {
+                    c.GetValues(0, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "John Nilsen"
+                    });
+                    c.GetValues(1, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "Mary Tellitson"
+                    });
+                });
 
-            if (Fixture.IsWeb)
-            {
-                Fixture.CommandAdapter.DoAction("Edit", null);
-            }
+            var contactDetail = contactList
+                .OpenRecordByFullName("Mary Tellitson")
+                .ExecuteActionIf(f => f.IsWeb, c => c.EditAction)
+                .Assert(c =>
+                {
+                    c.FullName.ShouldBe("Mary Tellitson");
+                    c.Department.ShouldBe("Development Department");
+                })
+                .Do(c =>
+                {
+                    c.FirstName = "User_1";
+                    c.LastName = "User_2";
+                })
+                .ExecuteAction(c => c.SaveAction);
 
-            Assert.Equal("Mary Tellitson", Fixture.CommandAdapter.GetFieldValue("Full Name"));
-            Assert.Equal("Development Department", Fixture.CommandAdapter.GetFieldValue("Department"));
-
-            Fixture.CommandAdapter.SetFieldValue("First Name", "User_1");
-            Fixture.CommandAdapter.SetFieldValue("Last Name", "User_2");
-
-            Fixture.CommandAdapter.DoAction("Save", null);
-            Fixture.CommandAdapter.DoAction("Navigation", "Contact");
-
-            Assert.Equal("John Nilsen", Fixture.CommandAdapter.GetCellValue("Contact", 0, "Full Name"));
-            Assert.Equal("User_1 User_2", Fixture.CommandAdapter.GetCellValue("Contact", 1, "Full Name"));
-
+            application
+                .NavigateToContact()
+                .Assert(c =>
+                {
+                    c.GetValues(0, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "John Nilsen"
+                    });
+                    c.GetValues(1, "Full Name").ShouldBe(new Dictionary<string, string>
+                    {
+                        ["Full Name"] = "User_1 User_2"
+                    });
+                });
         }
     }
 }
